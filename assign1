@@ -1,0 +1,153 @@
+;car gives the first element
+;cdr gives the rest
+
+
+;David Gulyas
+;1302870
+;CMPUT 325
+;LAB H01
+:Assignment 1
+
+;QUESTION 1
+;This function forms a list of pairs from the elements in a 
+;given list, in the way that the first two elements form the 
+;first pair, in the reversed order, and the next two form the 
+;second pair in the reversed order, and so on.  If the given 
+;list is even, it will get a list of proper pairs;  if it 
+;contains an odd number of elements, the last element is 
+;paired with itself.
+;The function first tests if the list L is null. If it is it
+;returns null since there is nothing left to process. It then
+;tests if there is only one element left in the list. If there
+;is then that element is paired with itself and stuck into 
+;another list. This is then returned.
+;If there are two or more elements in the list then
+;they are extracted and used to form a pair. This pair is then
+;inserted into whatever is returned by the recursive call to
+;the function using L minus the first two elements.
+;(form-pair '(a1 b 2 c 3)) ==> ((1 a) (2 b) (3 c))
+;(form-pair '(a1 b 2 c 3 d)) ==> ((1 a) (2 b) (3 c) (d d))
+(defun form-pair (L)
+  (if (null L)
+		nil
+		(if (null (cdr L))
+			(cons (cons (car L) L) nil )
+			(cons (cons (car (cdr L)) (cons (car L) nil)) 
+				  (form-pair (cdr (cdr L))))
+		)	
+	)
+)
+
+;QUESTION 2
+;(defun drop-pair L)
+;This function takes L which is a list of pairs, each of which 
+;consists of two arithmetic expressions; the function returns 
+;the list with all expressions evaluated; in addition, if the 
+;two expressions in a pair evaluate to the same value, the pair
+; will be dropped from the resulting list.
+;It first tests for an empty list then returns nil if so. It then
+;tests to see if the elements in the next pair evaluate to the same
+;thing. If they do it returns nil else is evaluates each element and
+;makes a new list of the values switched around. This is then cons'ed
+;onto the front of the recursive call.
+;eg (drop-pair (((* 2 3) (- 5 4)) ((+ 1 9) 7) ((* 3 4) 12))) -> ((1 6) (7 10))
+(defun drop-pair (L)
+	(if (null L)
+		nil
+        (if(eq (evalu (car (cdr (car L)))) (evalu(car (car L))))
+            nil
+            (cons (list (evalu (car (cdr (car L))))(evalu(car (car L)))) (drop-pair (cdr L)))
+        )
+	)		
+)
+
+
+;This function replaces the eval function since it wasn't on the
+;list of allowed functions.
+;It first tests to see if L is atomic. If it is then we assume
+;is is a number and return it. It then used apply to calculate 
+;the result. Right now it doesn't test to see if
+;there are two elements or if those elements are numbers.	
+(defun evalu (L)
+    (if (atom L)
+        L
+        (apply (car L) (cdr L))
+    )
+)
+	
+;QUESTION 3	
+;(remove-duplicate L)
+
+;It takes x as a list of atoms and removes repeated ones in x.
+;The order of the elements in the resulting list should preserve
+;the order in the given list. 
+;eg (remove-duplicate '(a b c a d b)) ==> (a b c d) or (c a d b)
+;Note that in both the order in the given list is preserved.
+;This is acomplished by going through the lists of tokens and testing
+;if each tokn appears in the list ahead of it. If if does then it is
+;discarded from the new list. If it doesn't then it is cons'ed onto the
+;rest of the new list. test-duplicate tests is x in in the 
+;list L.
+(defun remove-duplicate (L)
+    (if (null L)
+        nil
+        (if (null (test-duplicate (car L)(cdr L)))
+            (remove-duplicate (cdr L))
+            (cons (test-duplicate (car L)(cdr L)) (remove-duplicate (cdr L)))
+        )
+    )
+)
+
+(defun test-duplicate (x L)
+	(if (null L)
+		x
+		(if (eq x (car L))
+			nil
+			(test-duplicate x (cdr L))
+		)
+	)
+)
+
+"
+;QUESTION 4
+;(my-count L)
+;
+;Counts the distinct atoms in a non nested list.
+;(my-count '(a b a c d c)) ==> 4
+It does this by testing if the first character in L appears in
+the rest of the list. If it doesn't it returns the number of 
+elements in the cdr of L. If it does It adds one to that value.
+A better explanation is:  if (car L) is in (cdr L) then we can 
+simply drop (car L) in our counting. 
+"
+(defun my-count (L)
+    (if (null L)
+        0
+        (if (null (test-duplicate (car L)(cdr L)))
+            (my-count (cdr L))
+            (+ 1 (my-count (cdr L)))
+        )
+    )
+)
+
+"
+Question 5
+Returns the power set of L.
+"
+(defun power-set (L)
+    (if (null L)
+        nil
+        (if (null (cdr L))
+            L
+            (cons (power-set (cdr L)) (insert (car L) (power-set (cdr L))))
+        )
+    )
+)
+;inserts x ar the front of all the elements in L
+(defun insert (x L)
+    (if (null L)
+        (cons x nil)
+        (cons (append (cons x nil) (cons (car L) nil) ) (insert x (cdr L)))
+    )
+)
+
