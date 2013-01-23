@@ -74,7 +74,7 @@
         (apply (car L) (cdr L))
     )
 )
-	
+
 ;QUESTION 3	
 ;(remove-duplicate L)
 
@@ -138,16 +138,15 @@ Returns the power set of L.
     (if (null L)
         nil
         (if (null (cdr L))
-            L
-            (cons (power-set (cdr L)) (insert (car L) (power-set (cdr L))))
+            (cons L nil)
+             (append  (insert (cons (car L) nil) (power-set (cdr L))) (power-set (cdr L)))
         )
     )
 )
-;inserts x ar the front of all the elements in L
+;inserts x ar the front of all the elements in L including the null element
 (defun insert (x L)
     (if (null L)
         (cons x nil)
-        (cons (append (cons x nil) (cons (car L) nil) ) (insert x (cdr L)))
+        (cons (append x (car L)) (insert x (cdr L)))
     )
 )
-
