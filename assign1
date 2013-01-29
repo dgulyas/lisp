@@ -137,9 +137,15 @@ Returns the power set of L.
 (defun power-set (L)
     (if (null L)
         nil
+        (cons nil (real-power-set L))
+    )
+)
+(defun real-power-set (L)
+	(if (null L)
+        nil
         (if (null (cdr L))
             (cons L nil)
-             (append  (insert (cons (car L) nil) (power-set (cdr L))) (power-set (cdr L)))
+             (append  (insert (cons (car L) nil) (real-power-set (cdr L))) (real-power-set (cdr L)))
         )
     )
 )
@@ -150,3 +156,43 @@ Returns the power set of L.
         (cons (append x (car L)) (insert x (cdr L)))
     )
 )
+
+
+
+
+"
+QUESTION 6
+"
+(defun findOne (Name Type L)
+	(if (eq Type 'worst)
+		(findWorst Name L)
+		(findBest Name L)
+	)
+)
+
+(defun findWorst (Name worst L)
+	'worst
+
+
+
+
+)
+
+(defun findBest (Name best L)
+	'best
+
+
+
+
+)
+
+
+
+
+
+defun x (name bestsofar l)
+	if (null L) 
+		bestSoFar
+		if(car(car L)) = name && car(cdr(cdr(car L))) > (cdr(cdr(car bestSoFar)))
+		(x name (car L) (cdr L))
+		(x name bestSoFar (cdr L))
