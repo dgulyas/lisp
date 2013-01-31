@@ -270,5 +270,19 @@ Returns true if the course number of L1 is less then the course number of L2
     (string-lessp (car L1) (car L2))
 )
 
+"
+Question 7
+"
+(defun reached (x L)
+    (if (null L)
+        x
+        ()
+
+
+
+)
+
+
+
 
 
