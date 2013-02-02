@@ -3,6 +3,7 @@
 ;CMPUT 325
 ;LAB H01
 :Assignment 1
+;I'm not sure if my documentation is complete enough. If there are any rough parts please let me know.
 
 ;QUESTION 1
 ;This function forms a list of pairs from the elements in a
@@ -52,7 +53,7 @@
         nil
         (if(eq (evalu (car (cdr (car L)))) (evalu(car (car L))))
             nil
-            (cons (list (evalu (car (cdr (car L))))(evalu(car (car L)))) (drop-pair (cdr L)))
+            (cons (list (evalu(car (car L))) (evalu (car (cdr (car L))))) (drop-pair (cdr L)))
             )
     )
 )
@@ -107,11 +108,11 @@ tests if atom x is in list L
 )
 
 "
-;QUESTION 4
-;(my-count L)
-;
-;Counts the distinct atoms in a non nested list.
-;(my-count '(a b a c d c)) ==> 4
+QUESTION 4
+(my-count L)
+
+Counts the distinct atoms in a non nested list.
+(my-count '(a b a c d c)) ==> 4
 It does this by testing if the first character in L appears in
 the rest of the list. If it doesn't it returns the number of
 elements in the cdr of L. If it does It adds one to that value.
@@ -183,9 +184,9 @@ findOne decides if the worst or best grade is wanted and calls the appropriate f
 
 "
 Finds the worst grade that Name has recieved and returns the course grade pair of that grade
-Looks at the first Name Course Grade tuple in L. If the Name matchs name and the grade is
+Looks at the first Name Course Grade tuple in L. If Name matchs the tuple name and the tuple grade is
 worse then the grade in worstSoFar then the tuple becomes the new worstSoFar. When L is
-empty it returns worstSoFar.
+empty it returns worstSoFar. The big long if statement on line 197 compares the grades. 
 "
 (defun findWorst (Name worstSoFar L)
     (if (null L)
@@ -204,10 +205,9 @@ empty it returns worstSoFar.
 )
 
 "
-Finds the best grade that Name has recieved and returns the course grade pair of that grade
-Looks at the first Name Course Grade tuple in L. If the Name matchs name and the grade is
-higher then the grade in bestSoFar then the tuple becomes the new bestSoFar. When L is
-empty it returns bestSoFar.
+Does exactly the same thing as findWorst except it's looking for the best grade. I though about
+combining findBest and findWorst, but rejected it because duplicating the function doesn't
+take that much space. If this was a program I had to maintain I would combine them.
 "
 (defun findBest (Name bestSoFar L)
 	(if (null L)
@@ -266,10 +266,11 @@ only needs to be done once at the end.
 )
 
 "
-Contains the recursive part of the question. The the cdr part of the first triple 
+Contains the recursive part of the question. The cdr part of the first triple 
 of L will be cons'ed onto the rest of the list if the name in the first triple 
 of L matches the name argument. This leaves us with a list of course grade pairs
-that belong to the name argument. 
+that belong to the name argument. It's filtering our the tuples that don't match
+the name.
 "
 (defun filterGrades (name L)
     (if (null L)
@@ -302,8 +303,8 @@ Returns true if the course number of L1 is less then the course number of L2
 
 "
 QUESTION 7a
-reached tests if either of the arguments is null and removes x from the answer it gets from connected.
-The heavy lifting is done by connected.
+reached tests if either of the arguments is null. It also removes x from 
+the answer it gets from connected. The heavy lifting is done by connected.
 "
 (defun reached (x L)
 	(if (eq nil x)
@@ -320,9 +321,10 @@ Connected is based off the hint given in the forum. It maintains the list of pag
 visited(reached), a stack of pages not yet visited(stack) and the data set(L).
 If stack is empty it returns reached. If the first element in stack has been reached
 already, it cuts it off and calls the function again.
-If it hasn't been reached, it looks at all the pages that are connected to it, adds those
-pages to the stack and then adds itself to reached. Connected is then called again without
-the first element in stack and the new values in reached.
+If the first element in the stack hasn't been reached, it looks at all the pages 
+that are connected to it, adds those pages to the stack and then adds itself to reached. 
+Connected is then called again without the first element in stack and the new values 
+in reached.
 "
 (defun connected (reached stack L)
 	(if (eq nil stack)
@@ -455,12 +457,11 @@ counts the number of links in l that go to x, but that don't come from x.
 )
 
 "
-Used to sort Webpage LinkNumber pairs based on thier link number
+Used to sort Webpage LinkNumber pairs based on their link number
 "
 (defun webSort (L)
 	(sort L 'webGreaterThan)
 )
-
 (defun webGreaterThan (L1 L2)
 	(> (car (cdr L1)) (car (cdr L2)))
 )
