@@ -74,7 +74,7 @@
 ;QUESTION 3
 ;(remove-duplicate L)
 
-;It takes x as a list of atoms and removes repeated ones in x.
+;It takes x as a list of atoms and removes repeated atoms in x.
 ;The order of the elements in the resulting list should preserve
 ;the order in the given list.
 ;eg (remove-duplicate '(a b c a d b)) ==> (a b c d) or (c a d b)
@@ -136,8 +136,9 @@ Returns the power set of L.
         (cons nil (real-power-set L))
     )
 )
+
 (defun real-power-set (L)
-(if (null L)
+	(if (null L)
         nil
         (if (null (cdr L))
             (cons L nil)
@@ -145,6 +146,7 @@ Returns the power set of L.
         )
     )
 )
+
 ;inserts x ar the front of all the elements in L including the null element
 (defun insert (x L)
     (if (null L)
@@ -159,6 +161,9 @@ Returns the power set of L.
 "
 QUESTION 6a
 "
+"
+findOne decides if the worst or best grade is wanted and calls the appropriate function
+"
 (defun findOne (Name Type L)
     (if (eq Type 'worst)
         (cdr (findWorst Name nil L))
@@ -166,6 +171,12 @@ QUESTION 6a
     )
 )
 
+"
+Finds the worst grade that Name has recieved and returns the course grade pair of that grade
+Looks at the first Name Course Grade tuple in L. If the Name matchs name and the grade is
+worse then the grade in worstSoFar then the tuple becomes the new worstSoFar. When L is
+empty it returns worstSoFar.
+"
 (defun findWorst (Name worstSoFar L)
     (if (null L)
 		worstSoFar
@@ -182,6 +193,12 @@ QUESTION 6a
     )
 )
 
+"
+Finds the best grade that Name has recieved and returns the course grade pair of that grade
+Looks at the first Name Course Grade tuple in L. If the Name matchs name and the grade is
+higher then the grade in bestSoFar then the tuple becomes the new bestSoFar. When L is
+empty it returns bestSoFar.
+"
 (defun findBest (Name bestSoFar L)
 	(if (null L)
 		bestSoFar
@@ -198,7 +215,10 @@ QUESTION 6a
     )
 )
 
-
+"
+toNumber turns a grade into a number, enabling it to be compared with
+other grades. x should be an atom.
+"
 (defun toNumber (x)
     (if (null x)
         nil
@@ -271,18 +291,101 @@ Returns true if the course number of L1 is less then the course number of L2
 )
 
 "
-Question 7
+Question 7a
+reached tests if either of the arguments is null and removes x from the answer it gets from connected.
+The heavy lifting is done by connected.
 "
 (defun reached (x L)
-    (if (null L)
-        x
-        ()
-
-
-
+	(if (eq nil x)
+		nil
+		(if (eq nil L)
+			nil
+			(remove-atom x (connected nil (list x) L))
+		)
+	)
 )
 
+"
+Connected is based off the hint given in the forum. It maintains the list of pages
+visited(reached), a stack of pages not yet visited(stack) and the data set(L).
+If stack is empty it returns reached. If the first element in stack has been reached
+already, it cuts it off and calls the function again.
+If it hasn't been reached, it looks at all the pages that are connected to it, adds those
+pages to the stack and then adds itself to reached. Connected is then called again without
+the first element in stack and the new values in reached.
+"
+(defun connected (reached stack L)
+	(if (eq nil stack)
+		reached
+		(if (contains reached (car stack))
+			(connected reached (cdr stack) L)
+			(connected (cons (car stack) reached) 
+					   (remove-duplicate (append stack (connected-atom (car stack) L))) 
+					   L)
+		)
+	)
+)
 
+"
+Tests if x is in L
+x should be atom
+L should be a non-nested list.
+"
+(defun contains (L x)
+	(if (eq nil L)
+		nil
+		(if (eq (car L) x)
+			T
+			(contains (cdr L) x)
+		)
+	)
+)
 
+"
+Given a list of pairs representing web page links(L), it returns a list
+of all pages linked to from page x. 
+"
+(defun connected-atom (x L)
+	(if (null x)
+		nil
+		(if (null L)
+			nil
+			(if (eq x (car(car L)))
+				(cons (car(cdr(car L))) (connected-atom x (cdr L)))
+				(connected-atom x (cdr L))
+			)
+		)
+	)
+)
 
+"
+remove-list removes all instances of any atom in L1 from L2
+(remove-list '(A B) '(A B C D A B)) ==> (C D)
+"
+(defun remove-list (L1 L2)
+	(if (null L1)
+		L2
+		(if (null L2)
+			null 
+			(remove-list (cdr L1) (remove-atom (car L1) L2))
+		)
+	)
+)
+
+"
+remove-atom removes all instances of atom x from list L1
+(remove-atom 'A '(A B C D A)) ==> (B C D)
+"
+(defun remove-atom (x L1)
+	(if (null x)
+		L1
+		(if (null L1)
+			nil
+			(if (eq x (car L1))
+				(remove-atom x (cdr L1))
+				(cons (car L1) (remove-atom x (cdr L1)))
+			)
+		)
+	)
+)
 
