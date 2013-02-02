@@ -405,6 +405,11 @@ The importance of a web page could be determined by how many other web pages ref
 (rank pages L)
 where pages is a list of atoms naming web pages, and L is a list of pairs representing linkage. The function returns a permutation of pages such that the web pages are ordered according to the criterion above, i.e., the most referred web page is the first in the list, and so on. If two web pages are equally important in terms of references, then it doesn't matter how they are ordered.
 "
+
+"
+returns the list of pages in pages sorted accourding to page rank
+(rank '(a b) '((a a) (b a) (q b) (a b))) ==> (B A)
+"
 (defun rank (pages L)
 	(if (eq nil pages)
 		nil
@@ -412,14 +417,11 @@ where pages is a list of atoms naming web pages, and L is a list of pairs repres
 	)
 )
 
-(defun realRank (pages L)
-	(if (eq nil pages)
-		nil
-		(cons (list (car pages) (countLinks (car pages) L)) (realRank (cdr pages) L))
-	)
-)
-		
+"
+removes the page rank data from a list of Page PageRank pairs.
+(removeSecond '((UofA 128) (CSD 68) (Cmput325 23))) ==> (UOFA CSD CMPUT325)
 
+"
 (defun removeSecond (L)
 	(if (eq nil L)
 		nil
@@ -427,6 +429,21 @@ where pages is a list of atoms naming web pages, and L is a list of pairs repres
 	)
 )
 
+"
+each iteration counts the rank of (car pages). Builds a list of Page PageRank pairs
+(REALRANK (A B) ((A A) (B A) (Q B) (A B))) ==> ((A 1) (B 2))
+"
+(defun realRank (pages L)
+	(if (eq nil pages)
+		nil
+		(cons (list (car pages) (countLinks (car pages) L)) (realRank (cdr pages) L))
+	)
+)
+
+"
+counts the number of links in l that go to x, but that don't come from x.
+(countLinks 'a '((a a)(d a)(a b)(c a))) ==> 2
+"
 (defun countLinks (x L)
 	(if (eq L nil)
 		0
@@ -437,7 +454,9 @@ where pages is a list of atoms naming web pages, and L is a list of pairs repres
 	)
 )
 
-
+"
+Used to sort Webpage LinkNumber pairs based on thier link number
+"
 (defun webSort (L)
 	(sort L 'webGreaterThan)
 )
@@ -445,9 +464,3 @@ where pages is a list of atoms naming web pages, and L is a list of pairs repres
 (defun webGreaterThan (L1 L2)
 	(> (car (cdr L1)) (car (cdr L2)))
 )
-
-
-
-
-
-
