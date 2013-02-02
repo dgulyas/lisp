@@ -80,10 +80,9 @@
 ;eg (remove-duplicate '(a b c a d b)) ==> (a b c d) or (c a d b)
 ;Note that in both the order in the given list is preserved.
 ;This is acomplished by going through the lists of tokens and testing
-;if each tokn appears in the list ahead of it. If if does then it is
-;discarded from the new list. If it doesn't then it is cons'ed onto the
-;rest of the new list. test-duplicate tests is x in in the
-;list L.
+;if each token appears in the list ahead of it. If it does then it's
+;discarded from the new list. If it doesn't then it's cons'ed onto the
+;rest of the new list. 
 (defun remove-duplicate (L)
     (if (null L)
         nil
@@ -94,6 +93,9 @@
     )
 )
 
+"
+tests if atom x is in list L
+"
 (defun test-duplicate (x L)
     (if (null L)
         x
@@ -129,6 +131,8 @@ simply drop (car L) in our counting.
 "
 Question 5
 Returns the power set of L.
+calls real-power-set and inserts the null set into the returned list.
+(power-set '(a b c)) ==> (NIL (A B C) (A B) (A C) (A) (B C) (B) (C))
 "
 (defun power-set (L)
     (if (null L)
@@ -137,6 +141,14 @@ Returns the power set of L.
     )
 )
 
+"
+Inserts the first element in L into a copy of every element that it gets back from itself.
+Then inserts the first element by itself
+eg.
+a                  start with a
+a ab b             insert b
+a ab b ac abc bc c insert c
+"
 (defun real-power-set (L)
 	(if (null L)
         nil
@@ -147,7 +159,7 @@ Returns the power set of L.
     )
 )
 
-;inserts x ar the front of all the elements in L including the null element
+;inserts x at the front of all the elements in L including the null element
 (defun insert (x L)
     (if (null L)
         (cons x nil)
@@ -160,8 +172,6 @@ Returns the power set of L.
 
 "
 QUESTION 6a
-"
-"
 findOne decides if the worst or best grade is wanted and calls the appropriate function
 "
 (defun findOne (Name Type L)
@@ -291,7 +301,7 @@ Returns true if the course number of L1 is less then the course number of L2
 )
 
 "
-Question 7a
+QUESTION 7a
 reached tests if either of the arguments is null and removes x from the answer it gets from connected.
 The heavy lifting is done by connected.
 "
@@ -388,4 +398,56 @@ remove-atom removes all instances of atom x from list L1
 		)
 	)
 )
+
+"
+QUESTION 7b
+The importance of a web page could be determined by how many other web pages refer to it. A web page A is said to refer to another web page B iff A contains a link to B, and A and B are not the same web page (i.e., a web page referring to itself doesn't count). Define a function
+(rank pages L)
+where pages is a list of atoms naming web pages, and L is a list of pairs representing linkage. The function returns a permutation of pages such that the web pages are ordered according to the criterion above, i.e., the most referred web page is the first in the list, and so on. If two web pages are equally important in terms of references, then it doesn't matter how they are ordered.
+"
+(defun rank (pages L)
+	(if (eq nil pages)
+		nil
+		(removeSecond (webSort (realRank pages L)))
+	)
+)
+
+(defun realRank (pages L)
+	(if (eq nil pages)
+		nil
+		(cons (list (car pages) (countLinks (car pages) L)) (realRank (cdr pages) L))
+	)
+)
+		
+
+(defun removeSecond (L)
+	(if (eq nil L)
+		nil
+		(cons (car (car L)) (removeSecond (cdr L)))
+	)
+)
+
+(defun countLinks (x L)
+	(if (eq L nil)
+		0
+		(if (and (eq x (car (cdr (car L)))) (not (eq x (car (car L)))))
+			(+ 1 (countLinks x (cdr L)))
+			(countLinks x (cdr L))
+		)
+	)
+)
+
+
+(defun webSort (L)
+	(sort L 'webGreaterThan)
+)
+
+(defun webGreaterThan (L1 L2)
+	(> (car (cdr L1)) (car (cdr L2)))
+)
+
+
+
+
+
 
