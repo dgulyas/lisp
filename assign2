@@ -1,0 +1,160 @@
+"
+;David Gulyas
+;1302870
+;CMPUT 325
+;LAB H01
+;Assignment 2
+"
+
+"
+The requirements mention that our AND and OR should use short circuiting.
+interp uses the short circuiting already offered by the lisp AND and OR 
+functions.
+"
+
+"
+All interp does is call cInterp. The double nil represents an empty closure.
+"
+(defun interp (E P)
+    (cInterp E P nil nil)
+)
+
+
+"
+Vars and Vals is the closure for E. Vars is a list of variables
+and Vals is a list of what those variables mean.
+Vars: (x y z x w)
+Vals: (1 9 2 32 (rest (1 2 3)))
+x => 1
+y => 9
+w => (rest (1 2 3))
+To exaluate what a variable is Vars is searched through until it's found.
+The corresponding element in Vals is the inserted. In the example there 
+are two variables named x. The one closer to the front of the list has a
+closer scope(a 'local' variable) then the one at the end of the list. 
+"
+(defun cInterp (E P Vars Vals)
+    (cond 
+      ;test for atoms. If that atom has a substitution in the context, replace it with that.
+        ((atom E) (replaceVars E Vars Vals))   
+        (t
+        	;F is an atom, arg is a list of arguments
+            (let ( (f (car E))  (arg (cdr E)) )
+            	;debugging
+                ;(print f)(print arg)(print Vars)(print Vals)
+                (cond 
+                    ; handle built-in functions 
+                    ((eq f 'first) (car (cInterp (car arg) P Vars Vals)))
+                    ((eq f 'rest) (cdr (cInterp (car arg) P Vars Vals)))
+                    ((eq f '+) (+ (cInterp (car arg) P Vars Vals) (cInterp (car (cdr arg)) P Vars Vals)))
+                    ((eq f '-) (- (cInterp (car arg) P Vars Vals) (cInterp (car (cdr arg)) P Vars Vals)))
+                    ((eq f '*) (* (cInterp (car arg) P Vars Vals) (cInterp (car (cdr arg)) P Vars Vals)))
+                    ((eq f '>) (> (cInterp (car arg) P Vars Vals) (cInterp (car (cdr arg)) P Vars Vals)))
+                    ((eq f '<) (< (cInterp (car arg) P Vars Vals) (cInterp (car (cdr arg)) P Vars Vals)))
+                    ((eq f '=) (= (cInterp (car arg) P Vars Vals) (cInterp (car (cdr arg)) P Vars Vals)))
+                    ((eq f 'and) (and (cInterp (car arg) P Vars Vals) (cInterp (car (cdr arg)) P Vars Vals)))
+                    ((eq f 'or) (or (cInterp (car arg) P Vars Vals) (cInterp (car (cdr arg)) P Vars Vals)))
+                    ((eq f 'not) (not (cInterp (car arg) P Vars Vals)))
+                    ((eq f 'if) (if (cInterp (car arg) P Vars Vals) (cInterp (car (cdr arg)) P Vars Vals) 
+                    									 (cInterp (car(cdr(cdr arg))) P Vars Vals)))
+                    ((eq f 'null) (null (cInterp (car arg) P Vars Vals)))
+                    ((eq f 'atom) (atom (cInterp (car arg) P Vars Vals)))
+                    ((eq f 'eq) (eq (cInterp (car arg) P Vars Vals) (cInterp (car (cdr arg)) P Vars Vals)))
+                    ((eq f 'equal) (equal (cInterp (car arg) P Vars Vals) (cInterp (car (cdr arg)) P Vars Vals)))
+                    ((eq f 'number) (numberp (cInterp (car arg) P Vars Vals)))
+                    ((eq f 'cons) (cons (cInterp (car arg) P Vars Vals) (cInterp (car (cdr arg)) P Vars Vals)))
+                    
+                    ;handle user defined functions
+                    ;cInterp is called with: 
+                    ;*The body of the function. 
+                    ;*The same program is used. 
+                    ;*The variables of that function are appended onto the front of the vars list
+                    ;*The arguments passed into the function are passed to evalArgs to be evaluated and then appended to the 
+                    ;	front of the Vals list. This means that applicative order reduction is used.
+                    ((isUserDefined E P) (cInterp (isUserDefined E P) P (append (getVarsOfFunc E P) Vars) (append (evalArgs arg P Vars Vals) Vals)))
+                    (T E) ;If it's not a built in or user defined function, and not an atom it must be a list of data. Return it.
+                	
+                )
+            )
+        )
+    )
+)
+
+
+"
+Looks for element E in the Vars list. If it's found in there then the
+corresponding element in Vals is returned. Otherwise E is returned.
+This has the effect of replacing variables with the value they are
+bound to from the closure.
+"
+(defun replaceVars (E Vars Vals)
+    (if (null Vars)
+        E
+        (if (eq E (car Vars))
+            (car Vals)
+            (replaceVars E (cdr Vars) (cdr Vals))
+        )
+     )
+)
+        
+
+"
+Takes a list of arguments in L. Evaluates them with respect to program P
+and stores the results in M. This has the effect of evaluating
+the arguments of a user defined function. It needs to be done this way since
+the number of arguments in user defined functions is dynamic.
+"
+(defun evalArgs (L P Vars Vals)
+	(if (null L)
+		nil
+		(cons (cInterp (car L) P Vars Vals) (evalArgs (cdr L) P Vars Vals))
+	)
+)
+
+
+"
+Searches program P for the definition of the function called in function call f
+Returns the function body if it's defined, nil if it's not.
+(isUserDefined '(add 2 x) '((add (a b) = (+ a b)))) ==> (+ a b)
+(isUserDefined '(add 2) '((add (a b) = (+ a b)))) ==> nil
+"
+(defun isUserDefined (f P)             
+	(if (null P)
+		nil
+		(if (and (eq (car f) (car (car P)))
+                 (eq (countNum (car(cdr(car P)))) (countNum (cdr f))))
+			(car (cdr (cdr (cdr (car P))))) ;extract the function body
+			(isUserDefined f (cdr P))
+        )
+	)
+)
+
+
+"
+Searches program P for the variables of the function called in function call f
+Returns the vars if it's defined, nil if it's not.
+(getVarsOfFunc '(add 2 x) '((add (a b) = (+ a b)))) ==> (a b)
+(getVarsOfFunc '(add 2) '((add (a b) = (+ a b)))) ==> nil
+"
+(defun getVarsOfFunc (f P)             
+	(if (null P)
+		nil
+		(if (and (eq (car f) (car (car P)))
+                 (eq (countNum (car(cdr(car P)))) (countNum (cdr f))))
+			(car (cdr (car P))) ;extract the function variables
+			(getVarsOfFunc f (cdr P))
+        )
+	)
+)
+
+
+"
+Counts the number of first level elements in list L.
+Used for finding the arity of a function.
+"
+(defun countNum (L)
+    (if (null L)
+        0
+        (+ 1 (countNum (cdr L)))
+    )
+)
